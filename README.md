@@ -1,10 +1,11 @@
 # Disaster Response Pipeline Project 
 ## Table of Contents 
 
-1. Project Overview  
-2. Project Components
-3. File Description 
-4. Installation
+1. Project Overview
+2. Installation  
+3. Project Components
+4. File Description 
+
 
 ## Project Overview 
 The Disaster Response Pipeline project is part of the Udacity Data Science Nano Degree. The project analyzes a dataset containng real messages that are sent during disaster events. The goal of the project was to build an ETL pipeline to load and process data and a machine learning pipeline to classify those messages.
@@ -50,7 +51,23 @@ Distribution of messages by Category
 An example of a message
 
 ## File Description
-### Download and Installation 
+* Read.md: read me file
+* app 
+  * run.py : flask file to run the app
+  * templates
+    * master.html: main page of the web app
+    * go.html : result web page
+* data
+  * disaster_categories.csv : categories dataset
+  * disaster_messages.csv : messages dataset
+  * DisasterResponse.db : disaster response databse
+  * process_data. py : ETL process to clean data
+  * ETL Pipeline Preparation.ipynb : ETL pipeline preparation code
+* model
+  * train_classifier.py : classification code
+  * M Pipeline Preparation.ipynb : ML pipeline preparation code
+  * classifier.pkl :model saved as pickle file 
+### Running it
 git clone https://github.com/EstherMakhanuh/Disaster_Response_Pipeline
 
 While in the project's root directory disaster-response-pipeline run the ETL pipeline that cleans and stores data in database.
