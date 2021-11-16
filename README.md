@@ -38,4 +38,13 @@ There are 3 main components in this project
 * Export the final model as a pickle file
 ### 3. Flask Web App
 A web application displays some visualization about the dataset. Users can type in any new messages in the web app and receive the categories that the message may belong to.
-
+![This is an image](https://github.com/EstherMakhanuh/Disaster_Response_Pipeline/blob/main/header.PNG)
+Input field that takes new message
+![This is an image](https://github.com/EstherMakhanuh/Disaster_Response_Pipeline/blob/main/message_genre.PNG)
+Overview of Training dataset
+![This is an image](https://github.com/EstherMakhanuh/Disaster_Response_Pipeline/blob/main/top10_categories.PNG)
+Top 10 Categories
+![This is an image](https://github.com/EstherMakhanuh/Disaster_Response_Pipeline/blob/main/categories.PNG)
+Distribution of messages by Category
+![This is an image](https://github.com/EstherMakhanuh/Disaster_Response_Pipeline/blob/main/message_example.PNG)
+An example of a message
