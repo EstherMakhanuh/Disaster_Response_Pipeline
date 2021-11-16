@@ -66,7 +66,7 @@ An example of a message
 * model
   * train_classifier.py : classification code
   * M Pipeline Preparation.ipynb : ML pipeline preparation code
-  * classifier.pkl :model saved as pickle file 
+  * classifier.zip : model saved as pickle file then zipped as it was so big 
 ### Running it
 git clone https://github.com/EstherMakhanuh/Disaster_Response_Pipeline
 
