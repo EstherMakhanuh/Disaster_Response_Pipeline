@@ -4,6 +4,8 @@ import pandas as pd
 
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
+from sklearn.base import BaseEstimator, TransformerMixin
+from nltk.stem import PorterStemmer
 
 from flask import Flask
 from flask import render_template, request, jsonify
@@ -13,6 +15,40 @@ from sqlalchemy import create_engine
 
 
 app = Flask(__name__)
+
+# Custom transformer
+class DisasterWordExtractor(BaseEstimator, TransformerMixin):
+    def disaster_words(self, text):
+        """
+        INPUT: text - string, raw text data
+        OUTPUT: bool -bool object, True or False
+        """
+        # list of words that are commonly used during a disaster event
+        disaster_words = ['food','hunger','hungry','starving','water','drink','eat','thirsty',
+                 'need','hospital','medicine','medical','ill','pain','disease','injured','falling',
+                 'wound','blood','dying','death','dead','aid','help','assistance','cloth','cold','wet','shelter',
+                 'hurricane','earthquake','flood','whirlpool','live','alive','child','people','shortage','blocked',
+                 'trap','rob','gas','pregnant','baby','cry','fire','blizard','freezing','blackout','drought',
+                 'hailstorm','heat','pressure','lightning','tornado','tsunami']
+
+        # lemmatize the buzzwords
+        lemmatized_words = [WordNetLemmatizer().lemmatize(w, pos='v') for w in disaster_words]
+        # Get the stem words of each word in lemmatized_words
+        stem_disaster_words = [PorterStemmer().stem(w) for w in lemmatized_words]
+
+        # tokenize the input text
+        clean_tokens = tokenize(text)
+        for token in clean_tokens:
+            if token in stem_disaster_words:
+                return True
+        return False
+
+    def fit(self,X,y=None):
+        return self
+
+    def transform(self,X):
+        X_disaster_words = pd.Series(X).apply(self.disaster_words)
+        return pd.DataFrame(X_disaster_words)
 
 def tokenize(text):
     tokens = word_tokenize(text)
@@ -26,11 +62,11 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
+engine = create_engine('sqlite:///../data/DisasterResponse.db')
+df = pd.read_sql_table('DisasterResponse', engine)
 
 # load model
-model = joblib.load("../models/your_model_name.pkl")
+model = joblib.load("../models/classifier.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -43,17 +79,26 @@ def index():
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
     
+    # message counts by category
+    print(df[df.columns[4:]].sum())
+    print("message counts by category")
+    category_counts = df[df.columns[4:]].sum().sort_values(ascending=False)
+    category_name = list(category_counts.index)
+
+    # Genre distribution in Top 10 category
+    category_lables = df[df.columns[4:]].sum().sort_values(ascending=False).index
+    df_genre = df.groupby('genre')[category_lables].sum().reset_index()
+    df_genre =df_genre.drop(columns=['genre']).rename(index={0 : 'direct', 1:'news', 2:'social'})
+    
     # create visuals
+    
     # TODO: Below is an example - modify to create your own visuals
-    graphs = [
-        {
+    graphs = [{
             'data': [
                 Bar(
                     x=genre_names,
                     y=genre_counts
-                )
-            ],
-
+                    )],
             'layout': {
                 'title': 'Distribution of Message Genres',
                 'yaxis': {
@@ -61,11 +106,60 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
-                }
+                },
+                'template': "seaborn"
+            }
+        },
+        {
+            'data': [
+                Bar(
+                    x=category_name,
+                    y=category_counts
+                )],
+            'layout': {
+                'title': 'Distribution of Message Categories',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Category",
+                    'tickangle': -40
+                },
+                'template': "seaborn"
+            }
+        },
+        {
+            'data': [
+               Bar(
+                x=category_lables[:10],
+                y=df_genre.iloc[0],
+                name='Direct'
+                ),
+                Bar(
+                    x=category_lables[:10],
+                    y=df_genre.iloc[1],
+                    name='News'
+                ),
+                Bar(
+                    x=category_lables[:10],
+                    y=df_genre.iloc[2],
+                    name='Social'
+                )
+            ],
+            'layout': {
+                'title': 'Distribution of Messages in Top 10 Categories',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Categories",
+                    'tickangle': -40
+                },
+                'barmode': 'group'
             }
         }
-    ]
-    
+       ]
+
     # encode plotly graphs in JSON
     ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
     graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
